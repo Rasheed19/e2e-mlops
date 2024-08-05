@@ -1,0 +1,2 @@
+input_path_prefix: "iris_prediction/data/test"
+output_path_prefix: "iris_prediction/data/predictions"

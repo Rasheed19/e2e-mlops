@@ -1,0 +1,5 @@
+from pipelines.ingestion import data_ingestion_pipeline
+from pipelines.training import training_pipeline
+from pipelines.deployment import deployment_pipeline
+from pipelines.cleaning import cleanup_pipeline
+from pipelines.inference import inference_pipeline

@@ -1,0 +1,8 @@
+sagemaker==2.226.1
+scikit-learn==1.2.1
+python-dotenv==1.0.1
+click==8.1.7
+pytest==8.2.2
+shiny==1.0.0
+fsspec==2024.6.1
+s3fs==0.4.2

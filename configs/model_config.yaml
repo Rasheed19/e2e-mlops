@@ -1,0 +1,20 @@
+test_size: 0.2
+
+model_package_group_name: "iris-prediction-model-package"
+model_approval_status: PendingManualApproval
+register_accuracy_threshold: 0.8
+
+project_s3_prefix: "iris_prediction"
+train_key_prefix: "iris_prediction/data/train"
+test_key_prefix: "iris_prediction/data/test"
+output_path_prefix: "iris_prediction/pipeline_runs"
+code_location_prefix: "iris_prediction/uploaded_codes"
+pipeline_name: "iris-prediction-pipeline"
+framework_version: "1.2-1"
+
+endpoint_name: "iris-prediction-endpoint"
+
+param_grid:
+  n-estimators: "100 200 300"
+  learning-rate: "0.1 0.01"
+  max-depth: "2 4 6"
