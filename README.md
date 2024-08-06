@@ -1,8 +1,8 @@
 # e2e-mlops
-This is e2e-mlops! An end-to-end modularised machine learning operations project using [Amazon Sagemaker](https://github.com/aws/sagemaker-python-sdk) resources. It _ingests_ cleaned train and test data to an amazon S3 bucket, _trains_ a classification model from scratch, _evaluates_ the model, _registers_ the model in model registry if a specified performance metric threshold is met, and _deploy_ the latest registered model to an _endpoint_ either in serverless or real-time mode. Inferences can be made via a web app built using Python [shiny](https://shiny.posit.co/py/).
+This is e2e-mlops! An end-to-end modularised machine learning operations project using [Amazon Sagemaker](https://github.com/aws/sagemaker-python-sdk) resources. It _ingests_ cleaned train and test data to an amazon S3 bucket, _trains_ a classification model from scratch, _evaluates_ the model, _registers_ the model in model registry if a specified performance metric threshold is met, and _deploy_ the latest registered model to an _endpoint_ either in a serverless or real-time mode. Inferences can be made via a web app built using Python [shiny](https://shiny.posit.co/py/) or by running an inference pipeline against a data in S3 bucket for a batch prediction.
 
 ## Motivation
-I have seen many end-to-end machine learning projects that use Amazon Sagemaker but most of them use notebooks from model training to deployment. They are desihned for either exploration or experimentation in mind without considering production settings. The challenges with this appraoch is that it is difficult to achieve continuous training and deployment, configuration flexibility, extensibility, testing, reproducibility, and ease of use. This project is built to solve these challenges by using _steps_ and _pipelines_. The summary of this approach is thus: various _pipeplines_ (such as data ingestion and model training) call specific _steps_ (such as data uploader and model trainer), and these _steps_ make use of one or more _scripts_ which are designed to be run in the Amazon Sagemaker. The _pipelines_ can be triggered from a local developement terminal using CLI or via GitHub workflows.   
+I have seen many end-to-end machine learning projects that use Amazon Sagemaker but most of them use notebooks from model training to deployment. They are designed for either exploration or experimentation in mind without considering production settings. The challenges with this approach is that it is difficult to achieve continuous training and deployment, configuration flexibility, extensibility, testing, reproducibility, and ease of use. This project is built to solve these challenges by using _steps_ and _pipelines_. The summary of this approach is thus: various _pipeplines_ (such as data ingestion and model training) call specific _steps_ (such as data uploader and model trainer), and these _steps_ make use of one or more _scripts_ which are designed to be run in the Amazon Sagemaker. The _pipelines_ can be triggered from a local developement terminal using CLI or via GitHub workflows.   
 
 
 ## Set up
@@ -12,7 +12,7 @@ This project uses Amazon Sagemaker resources and thus need to be set up.
 1. If not already created, create AWS account. After that, create a user account for the project and give it an administrative access. Download the user's access token keys and save it somewhere, this will be used to configure aws CLI.
 1. Download and configure [aws cli](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) with the user's access token keys above.
 1. Create a sagemaker execution role to give full access to sagemaker to use AWS resources
-1. This project also uses the the functionalities of Sagemaker Studio to view pipeline runs, metric comparison in the model registry, and endpoint configureations. Thus, you need to enable Sagemaker Studio by creating a sagemaker domain. You can find 'Domains' under 'Admin configurations' in the Amazon Sagemaker menu. 
+1. This project also uses the functionalities of Sagemaker Studio to view pipeline runs, metric comparison in the model registry, and endpoint configurations. Thus, you need to enable Sagemaker Studio by creating a sagemaker domain. You can find 'Domains' under 'Admin configurations' in the Amazon Sagemaker menu. 
 1. Create a  new S3 bucket, this will be the location of all inputs and outputs of any pipeline runs. Note that the name must start with "sagemaker" (e.g. sagemaker-my-project-name).
 
 Now we are done with the basic AWS infrastructure configurations.
@@ -41,7 +41,7 @@ Now we are done with the basic AWS infrastructure configurations.
 Now, we are done with the set up; on to usage.
 
 ## Usage
-As described above this project is broken down into pipelines which allow for reproducibility, customization and ease of use. The following are the various pipelines that can be run from your local development environment.
+As described above, this project is broken down into pipelines which allow for reproducibility, customization and ease of use. The following are the various pipelines that can be run from your local development environment.
 1. `ingestion`, run the ingestion pipeline to ingest the cleaned training and test data into the created S3 bucket:
     ```
     python run.py --pipeline ingestion
@@ -76,12 +76,12 @@ As described above this project is broken down into pipelines which allow for re
 
 1. `inference`, the running deployment service can now be used for making predictions. Here, I implemented two scenarios:
 
-    1. via running inference pipeline against a data in the S3 bucket. The predictions will also be saved in the designated S3 path (you can configure the input and output S3 prefixes in the `configs/inference_config.yaml` file). You need to give the name of the inference file in the S3 input prefix which must be of the form '*.csv' (i.e., the file must be in `.csv` format). Here is the command for the case of running inference on a file named `test.csv` in the S3 output prefix:
+    - via running inference pipeline against a data in the S3 bucket. The predictions will also be saved in the designated S3 path (you can configure the input and output S3 prefixes in the `configs/inference_config.yaml` file). You need to give the name of the inference file in the S3 input prefix which must be of the form '*.csv' (i.e., the file must be in `.csv` format). Here is the command for the case of running inference on a file named `test.csv` in the S3 output prefix:
     ```
     python run.py --pipeline inference --inference-file test.csv
     ```
     
-    1. via an interactive app. I built a shiny app which makes use of the deployed endpoint to make predictions. Start the app locally by running
+    - via an interactive app. I built a shiny app which makes use of the deployed endpoint to make predictions. Start the app locally by running
     ```
     shiny run app.py
     ```
@@ -89,7 +89,7 @@ As described above this project is broken down into pipelines which allow for re
 
     ![Dashboard UI](assets/dashboard_ui.png)
 
-    or upload a `csv` file that contains the features to be predicted. In this case, the UI looks like this: 
+    or upload a `csv` file that contains the features whose labels are to be predicted. In this case, the UI looks like this: 
     
     ![Dashboard UI](assets/dashboard_ui_2.png)
 
