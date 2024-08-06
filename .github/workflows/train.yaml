@@ -12,6 +12,7 @@ on:
       - 'data/**'
       - 'assets/**'
       - 'apps/**'
+      - '.github/**'
 env:
   ROLE: ${{ secrets.ROLE }}
   S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
