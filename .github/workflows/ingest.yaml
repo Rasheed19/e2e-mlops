@@ -1,0 +1,42 @@
+name: data-ingestion
+run-name: ${{ github.actor }} is ingesting data to amazon S3 bucket
+
+on: workflow_dispatch
+
+env:
+  ROLE: ${{ secrets.ROLE }}
+  S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository code
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Test with pytest
+        run: pytest tests/ingestion_test.py
+      
+      - name: Configure AWS Credentials
+        id: aws_creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      
+      - name: Run ingestion pipeline
+        run: python run.py --pipeline ingestion --force-upload
