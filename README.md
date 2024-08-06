@@ -90,11 +90,15 @@ As described above this project is broken down into pipelines which allow for re
     ![Dashboard UI](assets/dashboard_ui.png)
 
     or upload a `csv` file that contains the features to be predicted. In this case, the UI looks like this: 
+    
     ![Dashboard UI](assets/dashboard_ui_2.png)
 
 1. `cleanup`, run the cleanup pipeline to **DELETE** all the pipeline run inputs and outputs, models in the model registry, and deployed endpoints. Note that this pipeline will recursively delete all the contents of the S3 bucket you created during the infrastructure set up.
 
 Note: you can fully customize both the infrastructure and model configurations by using `infrastructure_config.yaml`, `model_config.yaml`, and  `inference_config.yaml`in the `configs` directory.
+
+## CI/CD
+The `ingestion`, `training`, and `deployment` pipelines can be triggered via GitHub workflows. I have included the configurations for these workflows in `.github/workflows`, which are fully customisable to your needs. 
 
 ## License
 This project is made available under MIT License and it is available for use without any restriction. If you find this project useful, please leave a star!
