@@ -24,7 +24,7 @@ def train_data_splitter(
     path_to_test_data = "./data/test.csv"
 
     train_data.to_csv(path_or_buf=path_to_train_data, index=False)
-    train_data.to_csv(
+    test_data.to_csv(
         path_or_buf=path_to_test_data,
         index=False,
     )
