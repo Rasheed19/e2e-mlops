@@ -53,7 +53,7 @@ As described above, this project is broken down into pipelines which allow for r
 
 1. `training`, run the training pipeline to train, evaluate and register model in the Amazon Sagemaker model registry (and tag it 'Pending Approval'):
     ```
-    python run.py --pipeline ingestion
+    python run.py --pipeline training
     ```
     Note that when you trigger the training pipeline, the job will be submitted immediately to the Amazon Sagemaker. A successfully run training pipeline DAG will look like this (check the 'Pipeline' section of the Sagemaker Studio):
 
