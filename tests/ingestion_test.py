@@ -4,7 +4,6 @@ data = pd.read_csv(filepath_or_buffer="./data/train.csv", index_col=False)
 
 
 def test_column_match():
-
     valid_column_names = [
         "sepal length (cm)",
         "sepal width (cm)",
@@ -20,11 +19,10 @@ def test_column_match():
 
 
 def test_valid_values():
-
     contains_strings = data.map(lambda x: isinstance(x, str)).any().any()
     contains_nan = data.isnull().any().any()
 
-    assert (contains_strings | contains_nan) == False, (
+    assert (contains_strings | contains_nan) is False, (
         "Some values in the uploaded CSV contains strings and/or "
         "NaN values. Please check the file and re-upload."
     )

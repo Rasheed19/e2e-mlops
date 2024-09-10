@@ -13,6 +13,7 @@ on:
       - 'assets/**'
       - 'apps/**'
       - '.github/**'
+      - 'tests/**'
 env:
   ROLE: ${{ secrets.ROLE }}
   S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
@@ -26,21 +27,21 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           architecture: 'x64'
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
+
       - name: Test with pytest
         run: pytest tests/ingestion_test.py
-      
+
       - name: Configure AWS Credentials
         id: aws_creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -48,6 +49,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-      
+
       - name: Run training pipeline
-        run: python run.py --pipeline training 
+        run: python run.py --pipeline training
