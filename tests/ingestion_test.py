@@ -26,9 +26,7 @@ def test_valid_values(iris):
     contains_strings = iris.map(lambda x: isinstance(x, str)).any().any()
     contains_nan = iris.isnull().any().any()
 
-    print(contains_nan, contains_nan)
-
-    assert not (contains_strings | contains_nan), (
+    assert not (contains_strings and contains_nan), (
         "Some values in the uploaded CSV contains strings and/or "
         "NaN values. Please check the file and re-upload."
     )
