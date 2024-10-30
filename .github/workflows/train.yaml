@@ -6,6 +6,7 @@ on:
     branches:
       - main
     paths-ignore:
+      - 'Makefile'
       - '.gitignore'
       - 'LICENSE'
       - 'README.md'
@@ -51,4 +52,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Run training pipeline
-        run: python run.py --pipeline training
+        run: python run.py --pipeline train
