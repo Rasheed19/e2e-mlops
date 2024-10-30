@@ -157,6 +157,9 @@ cython_debug/
 .secrets/
 sageintro.venv/
 
+# ignore pyenv configuration
+.python-version
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

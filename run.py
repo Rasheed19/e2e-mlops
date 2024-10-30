@@ -1,17 +1,19 @@
 import os
+
+import boto3
 import click
 from dotenv import load_dotenv
 from sagemaker.session import Session
-import boto3
 
-from utils.helper import load_yaml_file
 from pipelines import (
+    cleanup_pipeline,
     data_ingestion_pipeline,
-    training_pipeline,
     deployment_pipeline,
     inference_pipeline,
-    cleanup_pipeline,
+    training_pipeline,
 )
+from utils.constants import PipelineMode
+from utils.helper import load_yaml_file
 
 load_dotenv()
 
@@ -23,45 +25,48 @@ Entry point for running pipelines.
 )
 @click.option(
     "--pipeline",
-    default="ingestion",
-    help="""
-    The kind of pipeline to run. Valid options are 
-    'ingestion', 'training', and 'deployment'.
+    default=PipelineMode.TRAIN,
+    help=f"""
+    The kind of pipeline to run. Valid options are {", ".join([mode.value for mode in PipelineMode])}.
     """,
 )
 @click.option(
     "--force-upload",
     is_flag=True,
     default=False,
-    help="""
+    help=f"""
     If this flag is given, train and test
     data will be forced to upload even if they
-    already exist in the s3 bucket.
+    already exist in the s3 bucket. This flag
+    must be used when pipeline is set to {PipelineMode.TRAIN}.
     """,
 )
 @click.option(
     "--serverless",
     is_flag=True,
     default=False,
-    help="""
-    If this flag is given, model will be 
-    deployed to an endpoint in severless mode 
-    else real-time mode.
+    help=f"""
+    If this flag is given, model will be
+    deployed to an endpoint in severless mode
+    else real-time mode. This flag
+    must be used when pipeline is set to {PipelineMode.DEPLOY}.
     """,
 )
 @click.option(
     "--inference-file-name",
     type=click.STRING,
-    help="""
-    Name of the inference data file in the 
-    s3 bucket prefix. Must be of the form "*.csv".
+    help=f"""
+    Name of the inference data file in the
+    s3 bucket prefix. Must be of the form "*.csv". This argument
+    must be used when pipeline is set to {PipelineMode.INFERENCE}.
     """,
 )
 @click.option(
     "--deployed-endpoint-name",
     type=click.STRING,
-    help="""
-    Name of the deployed sagemaker endpoint.
+    help=f"""
+    Name of the deployed sagemaker endpoint. This argument
+    must be used when pipeline is set to {PipelineMode.DEPLOY}.
     """,
 )
 def main(
@@ -71,7 +76,6 @@ def main(
     force_upload: bool = False,
     serverless: bool = False,
 ) -> None:
-
     ROLE: str = os.getenv("ROLE")
     S3_BUCKET_NAME: str = os.getenv(
         "S3_BUCKET_NAME"
@@ -86,7 +90,8 @@ def main(
     sm_client = boto3.client("sagemaker")
     s3_client = boto3.client("s3")
 
-    if pipeline == "ingestion":
+    if pipeline == PipelineMode.TRAIN:
+        # upload data to s3; will be skipped if data already exists unless force_upload is True
         data_ingestion_pipeline(
             test_size=model_config["test_size"],
             session=session,
@@ -97,7 +102,7 @@ def main(
             force_upload=force_upload,
         )
 
-    elif pipeline == "training":
+        # train model
         hyperparameters = model_config["param_grid"]
         hyperparameters["train"] = (
             f"s3://{S3_BUCKET_NAME}/{model_config['train_key_prefix']}/train.csv"
@@ -121,7 +126,7 @@ def main(
             code_location=f"s3://{S3_BUCKET_NAME}/{model_config['code_location_prefix']}",
         )
 
-    elif pipeline == "deployment":
+    elif pipeline == PipelineMode.DEPLOY:
         deployment_pipeline(
             role=ROLE,
             session=session,
@@ -136,7 +141,7 @@ def main(
             ],
         )
 
-    elif pipeline == "cleanup":
+    elif pipeline == PipelineMode.CLEAN:
         cleanup_pipeline(
             sm_client=sm_client,
             s3_client=s3_client,
@@ -147,7 +152,7 @@ def main(
             endpoint_find_key=model_config["endpoint_name"],
         )
 
-    elif pipeline == "inference":
+    elif pipeline == PipelineMode.INFERENCE:
         inference_pipeline(
             session=session,
             deployed_endpoint_name=deployed_endpoint_name,
@@ -158,8 +163,7 @@ def main(
 
     else:
         raise ValueError(
-            "'pipeline' must be an element of ['ingestion', 'training', "
-            f"'deployment', 'inference', 'cleanup'], but {pipeline} was given."
+            f"--pipeline arg must take one of  {', '.join([mode.value for mode in PipelineMode])}; but {pipeline} was given."
         )
 
     return None
