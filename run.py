@@ -102,7 +102,7 @@ def main(
             force_upload=force_upload,
         )
 
-        # train model
+        # train model and register model package
         hyperparameters = model_config["param_grid"]
         hyperparameters["train"] = (
             f"s3://{S3_BUCKET_NAME}/{model_config['train_key_prefix']}/train.csv"
