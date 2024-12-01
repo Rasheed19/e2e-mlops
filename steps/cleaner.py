@@ -46,11 +46,9 @@ def delete_sagemaker_pipeline(sm_client: Any, pipeline_name: str):
 def delete_project_prefix_contents(
     s3_client: Any, bucket_name: str, prefix: str
 ) -> None:
-
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
 
     try:
-
         for object in response["Contents"]:
             print("Deleting", object["Key"])
             s3_client.delete_object(Bucket=bucket_name, Key=object["Key"])
@@ -61,8 +59,17 @@ def delete_project_prefix_contents(
     return None
 
 
-def delete_endpoints(sm_client: Any, endpoint_find_key: str) -> None:
+def delete_monitoring_schedule(sm_client: Any, schedule_name: str) -> None:
+    try:
+        sm_client.delete_monitoring_schedule(MonitoringScheduleName=schedule_name)
+        print("{} monitoring schedule deleted".format(schedule_name))
+    except Exception as e:
+        print("{} \n".format(e))
 
+    return None
+
+
+def delete_endpoints(sm_client: Any, endpoint_find_key: str) -> None:
     try:
         response = sm_client.list_endpoints(
             NameContains=endpoint_find_key,
@@ -77,6 +84,16 @@ def delete_endpoints(sm_client: Any, endpoint_find_key: str) -> None:
         )
 
         for endpoint in response["Endpoints"]:
+            # list monitoring schedules
+            # schedules = sm_client.list_monitoring_schedules(
+            #     EndpointName=endpoint["EndpointName"]
+            # )
+
+            # for schedule in schedules["MonitoringScheduleSummaries"]:
+            #     delete_monitoring_schedule(
+            #         sm_client, schedule["MonitoringScheduleName"]
+            #     )
+
             print("Deleting", endpoint["EndpointName"])
             sm_client.delete_endpoint(EndpointName=endpoint["EndpointName"])
 

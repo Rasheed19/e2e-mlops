@@ -1,7 +1,8 @@
 from typing import Any
+
 from sagemaker.session import Session
 
-from steps import model_deployer
+from steps import deploy_model, fetch_model
 from utils.helper import get_logger
 
 logger = get_logger(__name__)
@@ -15,20 +16,25 @@ def deployment_pipeline(
     model_package_group_name: str,
     instance_type: str,
     instance_count: int,
+    data_capture_destination_uri: str,
     serverless: bool,
     serverless_inference_config: dict,
 ) -> None:
-
     logger.info("Model deployment pipeline has started.")
-    # might want to write the latest model description somewhere!
-    latest_model_description = model_deployer(
+
+    latest_model = fetch_model(
         role=role,
         session=session,
         sm_client=sm_client,
-        endpoint_name=endpoint_name,
         model_package_group_name=model_package_group_name,
+    )
+
+    deploy_model(
+        latest_model=latest_model,
+        endpoint_name=endpoint_name,
         instance_type=instance_type,
         instance_count=instance_count,
+        data_capture_destination_uri=data_capture_destination_uri,
         serverless=serverless,
         serverless_inference_config=serverless_inference_config,
     )

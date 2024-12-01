@@ -1,5 +1,5 @@
-from sagemaker.session import Session
 from sagemaker.s3 import S3Downloader
+from sagemaker.session import Session
 
 from utils.helper import get_logger
 
@@ -16,17 +16,16 @@ def data_uploader(
     test_key_prefix: str,
     force_upload: bool,
 ) -> None:
-
-    s3_data_uri = f"s3://{s3_bucket_name}/{project_s3_prefix}/data"
-    s3_data_dir_contents = S3Downloader.list(s3_uri=s3_data_uri)
+    s3_data_dir_contents = S3Downloader.list(
+        s3_uri=f"s3://{s3_bucket_name}/{project_s3_prefix}/data"
+    )
     s3_data_dir_contents = set(s3_data_dir_contents)
     issubset = {
-        f"{s3_data_uri}/train/train.csv",
-        f"{s3_data_uri}/test/test.csv",
+        f"s3://{s3_bucket_name}/{train_key_prefix}/{path_to_train_data.rstrip('/')[0]}",
+        f"s3://{s3_bucket_name}/{test_key_prefix}/{path_to_test_data.rstrip('/')[0]}",
     }.issubset(s3_data_dir_contents)
 
     if issubset:
-
         if force_upload:
             logger.warning(
                 "Train and test data already exist in s3 bucket but forcing upload "

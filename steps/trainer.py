@@ -1,8 +1,8 @@
 from sagemaker.inputs import TrainingInput
-from sagemaker.workflow.steps import TrainingStep
-from sagemaker.sklearn import SKLearn
 from sagemaker.session import Session
+from sagemaker.sklearn import SKLearn
 from sagemaker.sklearn.estimator import SKLearn
+from sagemaker.workflow.steps import TrainingStep
 
 
 def model_trainer(
@@ -16,7 +16,6 @@ def model_trainer(
     output_path: str,
     code_location: str,
 ) -> tuple[SKLearn, TrainingStep]:
-
     sklearn_estimator = SKLearn(
         role=role,
         sagemaker_session=sagemaker_session,

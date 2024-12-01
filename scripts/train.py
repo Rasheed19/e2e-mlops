@@ -1,22 +1,21 @@
 import argparse
-import os
-import joblib
 import json
-import pandas as pd
 import logging
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import GridSearchCV
+import os
 
+import joblib
+import pandas as pd
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
 
     # hyperparameters sent by the client are passed as command-line arguments to the script.
@@ -39,8 +38,8 @@ if __name__ == "__main__":
         engine="python",
     )
 
-    X_train = dataset_trn.drop(columns=["iris"])
-    y_train = dataset_trn["iris"]
+    X_train = dataset_trn.drop(columns=["target"])
+    y_train = dataset_trn["target"]
 
     pipeline = Pipeline(
         [
@@ -58,7 +57,7 @@ if __name__ == "__main__":
         "classifier__max_depth": [int(el) for el in args.max_depth.split(" ")],
     }
 
-    logger.info(f"Training model...")
+    logger.info("Training model...")
     grid_search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,

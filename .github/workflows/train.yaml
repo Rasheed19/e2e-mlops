@@ -1,20 +1,20 @@
 name: model-training
 run-name: ${{ github.actor }} is submitting training pipeline jobs to Amazon Sagemaker
 
-on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'Makefile'
-      - '.gitignore'
-      - 'LICENSE'
-      - 'README.md'
-      - 'data/**'
-      - 'assets/**'
-      - 'apps/**'
-      - '.github/**'
-      - 'tests/**'
+on:  workflow_dispatch
+  # push:
+  #   branches:
+  #     - main
+  #   paths-ignore:
+  #     - 'Makefile'
+  #     - '.gitignore'
+  #     - 'LICENSE'
+  #     - 'README.md'
+  #     - 'data/**'
+  #     - 'assets/**'
+  #     - 'apps/**'
+  #     - '.github/**'
+  #     - 'tests/**'
 env:
   ROLE: ${{ secrets.ROLE }}
   S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}

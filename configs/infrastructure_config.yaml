@@ -1,6 +1,0 @@
-instance_type: "ml.m5.xlarge"
-instance_count: 1
-
-serverless_inference_config:
-  memory_size_in_mb: 1024
-  max_concurrency: 10

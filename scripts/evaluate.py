@@ -1,15 +1,16 @@
-import tarfile
 import json
 import logging
 import pathlib
+import tarfile
+
 import joblib
 import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
+    confusion_matrix,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
-    confusion_matrix,
 )
 from sklearn.pipeline import Pipeline
 
@@ -19,7 +20,6 @@ logger.addHandler(logging.StreamHandler())
 
 
 if __name__ == "__main__":
-
     model_path = "/opt/ml/processing/model/model.tar.gz"
     with tarfile.open(model_path) as tar:
         # tar.extractall(path="..")
@@ -34,8 +34,8 @@ if __name__ == "__main__":
     df = pd.read_csv(test_path, index_col=False)
 
     logger.info("Reading test data.")
-    y_test = df["iris"].values
-    X_test = df.drop(["iris"], axis=1)
+    y_test = df["target"].values
+    X_test = df.drop(["target"], axis=1)
 
     logger.info("Performing predictions against test data.")
     predictions = model.predict(X_test)

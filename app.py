@@ -1,26 +1,28 @@
-from shiny import App, Inputs, Outputs, Session, render, ui, reactive
-import pandas as pd
-from shiny.types import FileInfo
-from pathlib import Path
 from datetime import datetime as dt
+from pathlib import Path
 
-from utils.helper import prepare_single_prediction_data, prepare_batch_prediction_data
+import pandas as pd
+from shiny import App, Inputs, Outputs, Session, reactive, render, ui
+from shiny.types import FileInfo
+
 from apps.server import (
-    get_merged_prediction_data,
-    load_image,
-    github_text,
     about_prediction_service,
+    get_merged_prediction_data,
+    github_text,
+    load_image,
 )
+from utils.constants import AppPredictionMode
+from utils.helper import prepare_batch_prediction_data, prepare_single_prediction_data
 
 # define your endpoint name here
-ENPOINT_NAME: str = "iris-prediction-endpoint-2024-08-05-18-07-08"
+ENPOINT_NAME: str = "iris-prediction-endpoint-2024-11-03-20-59-48"
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.input_selectize(
             "prediction_type",
             "Select prediction type",
-            choices=["Single-sample prediction", "Batch prediction"],
+            choices=(AppPredictionMode.SINGLE, AppPredictionMode.BATCH),
             multiple=False,
         ),
         ui.output_ui("text_input_upload_ui"),
@@ -40,7 +42,6 @@ app_ui = ui.page_sidebar(
 
 
 def server(input: Inputs, output: Outputs, session: Session):
-
     @reactive.calc
     def parsed_file():
         file: list[FileInfo] | None = input.batch_csv()
@@ -51,19 +52,20 @@ def server(input: Inputs, output: Outputs, session: Session):
     @reactive.calc
     @reactive.event(input.get_prediction_btn)
     def get_prepared_data():
-
-        if input.prediction_type() == "Single-sample prediction":
-            prepared_data = prepare_single_prediction_data(
+        if input.prediction_type() == AppPredictionMode.SINGLE:
+            prepared_data, err = prepare_single_prediction_data(
                 sepal_length=input.sepal_length(),
                 sepal_width=input.sepal_width(),
                 petal_length=input.petal_length(),
                 petal_width=input.petal_width(),
             )
 
-        elif input.prediction_type() == "Batch prediction":
-            prepared_data = prepare_batch_prediction_data(uploaded_data=parsed_file())
+        elif input.prediction_type() == AppPredictionMode.BATCH:
+            prepared_data, err = prepare_batch_prediction_data(
+                uploaded_data=parsed_file()
+            )
 
-        return prepared_data
+        return prepared_data, err
 
     @render.data_frame
     def summary():
@@ -89,8 +91,7 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.ui
     def text_input_upload_ui():
-
-        if input.prediction_type() == "Single-sample prediction":
+        if input.prediction_type() == AppPredictionMode.SINGLE:
             return (
                 ui.card(
                     ui.row(
@@ -139,7 +140,7 @@ def server(input: Inputs, output: Outputs, session: Session):
                     ),
                 ),
             )
-        elif input.prediction_type() == "Batch prediction":
+        elif input.prediction_type() == AppPredictionMode.BATCH:
             return (
                 ui.card(
                     ui.input_file(
@@ -162,97 +163,98 @@ def server(input: Inputs, output: Outputs, session: Session):
 
     @render.ui
     def prediction_table():
-        prepared_data = get_prepared_data()
+        prepared_data, err = get_prepared_data()
 
-        if isinstance(prepared_data, pd.DataFrame):
-            with ui.Progress(min=0, max=1) as p:
-                p.set(message="Getting predictions", detail="This may take a while...")
-                p.inc(amount=0.5, message="Predicting...")
-                merged_prediction_data = get_merged_prediction_data(
-                    prepared_data=prepared_data,
-                    endpoint_name=ENPOINT_NAME,
-                )
-                p.inc(amount=0.9, message="Predicting...")
-                p.close()
-
-            @render.data_frame
-            def _render_table():
-                return render.DataGrid(data=merged_prediction_data, width=1000)
-
-            @render.image
-            def _iris_virginica():
-                return load_image(Path().resolve() / "assets" / "iris_virginica.jpg")
-
-            @render.image
-            def _iris_versicolor():
-                return load_image(Path().resolve() / "assets" / "iris_versicolor.jpg")
-
-            @render.image
-            def _iris_setosa():
-                return load_image(Path().resolve() / "assets" / "iris_setosa.jpg")
-
-            @render.download(
-                filename=lambda: f"iris-prediction-{dt.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv",
-                media_type="text/csv",
+        if err is not None:
+            ui.notification_show(
+                err,
+                type="error",
+                duration=5,
             )
-            def _download_handler():
-                return (prepared_data.to_csv().encode("utf-8"),)
 
-            return ui.tags.div(
-                ui.row(
-                    ui.column(
-                        10,
-                        ui.card(
-                            ui.card_header(
-                                "Uploaded/input data with predicted iris type"
-                            ),
-                            ui.output_data_frame("_render_table"),
-                        ),
-                    ),
-                    ui.column(
-                        2,
-                        ui.download_button(
-                            "_download_handler",
-                            "Download data as CSV",
-                            class_="btn btn-primary",
-                        ),
-                    ),
+            return
+
+        with ui.Progress(min=0, max=1) as p:
+            p.set(message="Getting predictions", detail="This may take a while...")
+            p.inc(amount=0.5, message="Predicting...")
+            merged_prediction_data = get_merged_prediction_data(
+                prepared_data=prepared_data,
+                endpoint_name=ENPOINT_NAME,
+            )
+            p.inc(amount=0.9, message="Predicting...")
+            p.close()
+
+        @render.data_frame
+        def _render_table():
+            return render.DataGrid(data=merged_prediction_data, width=1000)
+
+        @render.image
+        def _iris_virginica():
+            return load_image(Path().resolve() / "assets" / "iris_virginica.jpg")
+
+        @render.image
+        def _iris_versicolor():
+            return load_image(Path().resolve() / "assets" / "iris_versicolor.jpg")
+
+        @render.image
+        def _iris_setosa():
+            return load_image(Path().resolve() / "assets" / "iris_setosa.jpg")
+
+        @render.download(
+            filename=lambda: f"iris-prediction-{dt.now().strftime('%Y-%m-%d-%H-%M-%S')}.csv",
+            media_type="text/csv",
+        )
+        def _download_handler():
+            return (prepared_data.to_csv().encode("utf-8"),)
+
+        return ui.tags.div(
+            ui.row(
+                ui.column(
+                    10,
                     ui.card(
-                        ui.card_header("About prediction service"),
-                        about_prediction_service(),
-                        ui.row(
-                            *[
-                                ui.column(
-                                    4,
-                                    ui.card(
-                                        ui.card_header(h),
-                                        ui.output_image(
-                                            id=id_,
-                                            height="200px",
-                                        ),
-                                    ),
-                                )
-                                for h, id_ in zip(
-                                    [
-                                        "Iris Virginica",
-                                        "Iris Versicolor",
-                                        "Iris Setosa",
-                                    ],
-                                    [
-                                        "_iris_virginica",
-                                        "_iris_versicolor",
-                                        "_iris_setosa",
-                                    ],
-                                )
-                            ]
-                        ),
+                        ui.card_header("Uploaded/input data with predicted iris type"),
+                        ui.output_data_frame("_render_table"),
                     ),
-                )
+                ),
+                ui.column(
+                    2,
+                    ui.download_button(
+                        "_download_handler",
+                        "Download data as CSV",
+                        class_="btn btn-primary",
+                    ),
+                ),
+                ui.card(
+                    ui.card_header("About prediction service"),
+                    about_prediction_service(),
+                    ui.row(
+                        *[
+                            ui.column(
+                                4,
+                                ui.card(
+                                    ui.card_header(h),
+                                    ui.output_image(
+                                        id=id_,
+                                        height="200px",
+                                    ),
+                                ),
+                            )
+                            for h, id_ in zip(
+                                [
+                                    "Iris Virginica",
+                                    "Iris Versicolor",
+                                    "Iris Setosa",
+                                ],
+                                [
+                                    "_iris_virginica",
+                                    "_iris_versicolor",
+                                    "_iris_setosa",
+                                ],
+                            )
+                        ]
+                    ),
+                ),
             )
-        ui.notification_show(
-            prepared_data,
-            type="error",
-            duration=5,
         )
 
 

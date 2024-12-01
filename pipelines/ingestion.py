@@ -1,6 +1,6 @@
 from sagemaker.session import Session
 
-from steps import data_loader, train_data_splitter, data_uploader
+from steps import data_loader, data_uploader, train_data_splitter
 from utils.helper import get_logger
 
 logger = get_logger(__name__)
@@ -15,7 +15,6 @@ def data_ingestion_pipeline(
     test_key_prefix: str,
     force_upload: bool,
 ) -> None:
-
     logger.info("Data ingestion pipeline has started.")
 
     dataset, target_name = data_loader()

@@ -1,16 +1,16 @@
+from sagemaker.processing import FrameworkProcessor
+from sagemaker.session import Session
+from sagemaker.sklearn import SKLearn
+from sagemaker.workflow.execution_variables import ExecutionVariables
+from sagemaker.workflow.functions import Join
+from sagemaker.workflow.pipeline_context import PipelineSession
+from sagemaker.workflow.properties import PropertyFile
 from sagemaker.workflow.steps import (
-    ProcessingStep,
     ProcessingInput,
     ProcessingOutput,
+    ProcessingStep,
+    TrainingStep,
 )
-from sagemaker.sklearn import SKLearn
-from sagemaker.session import Session
-from sagemaker.workflow.functions import Join
-from sagemaker.workflow.execution_variables import ExecutionVariables
-from sagemaker.workflow.properties import PropertyFile
-from sagemaker.workflow.steps import TrainingStep
-from sagemaker.processing import FrameworkProcessor
-from sagemaker.workflow.pipeline_context import PipelineSession
 
 
 def model_evaluator(
@@ -25,7 +25,6 @@ def model_evaluator(
     test_data_uri: str,
     code_location: str,
 ) -> tuple[PropertyFile, ProcessingStep]:
-
     sklearn_processor = FrameworkProcessor(
         estimator_cls=SKLearn,
         role=role,

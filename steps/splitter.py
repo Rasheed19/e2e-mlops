@@ -9,7 +9,6 @@ logger = get_logger(__name__)
 def train_data_splitter(
     dataset: pd.DataFrame, target_name: str, test_size: float = 0.2
 ) -> tuple[str, str]:
-
     train_data, test_data = train_test_split(
         dataset,
         test_size=test_size,

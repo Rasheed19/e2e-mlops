@@ -1,6 +1,9 @@
 import logging
-import yaml
+
 import pandas as pd
+import yaml
+
+from utils.constants import DataField
 
 
 def load_yaml_file(path: str) -> dict:
@@ -11,7 +14,6 @@ def load_yaml_file(path: str) -> dict:
 
 
 class CustomFormatter(logging.Formatter):
-
     purple = "\x1b[1;35m"
     grey = "\x1b[38;20m"
     yellow = "\x1b[33;20m"
@@ -35,7 +37,6 @@ class CustomFormatter(logging.Formatter):
 
 
 def get_logger(root_logger: str) -> logging.Logger:
-
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(CustomFormatter())
 
@@ -57,14 +58,14 @@ def is_number(s: str) -> bool:
 
 def prepare_single_prediction_data(
     sepal_length: str, sepal_width: str, petal_length: str, petal_width: str
-) -> pd.DataFrame | str:
+) -> tuple[pd.DataFrame, str | None]:
     data = pd.DataFrame(
-        {
-            "sepal length (cm)": [sepal_length],
-            "sepal width (cm)": [sepal_width],
-            "petal length (cm)": [petal_length],
-            "petal width (cm)": [petal_width],
-        }
+        dict(
+            zip(
+                DataField.FEATURES,
+                [[sepal_length], [sepal_width], [petal_length], [petal_width]],
+            )
+        )
     )
 
     is_valid = [
@@ -72,24 +73,21 @@ def prepare_single_prediction_data(
     ]
 
     if all(is_valid):
-        return data
+        return data, None
 
-    return "One or some of the inputs are invalid. All inputs must be float."
+    return (
+        pd.DataFrame(),
+        "One or some of the inputs are invalid. All inputs must be float.",
+    )
 
 
-def prepare_batch_prediction_data(uploaded_data: pd.DataFrame) -> pd.DataFrame | str:
-
-    valid_column_names = [
-        "sepal length (cm)",
-        "sepal width (cm)",
-        "petal length (cm)",
-        "petal width (cm)",
-    ]
-
-    if valid_column_names != list(uploaded_data.columns):
-        return (
+def prepare_batch_prediction_data(
+    uploaded_data: pd.DataFrame,
+) -> tuple[pd.DataFrame, str | None]:
+    if DataField.FEATURES != tuple(uploaded_data.columns):
+        return pd.DataFrame(), (
             "Column names are invalid or not ordered correctly. "
-            f"Column names must be and ordered as {valid_column_names}."
+            f"Column names must be and ordered as {DataField.FEATURES}."
         )
 
     # Check for strings
@@ -99,12 +97,12 @@ def prepare_batch_prediction_data(uploaded_data: pd.DataFrame) -> pd.DataFrame |
     contains_nan = uploaded_data.isnull().any().any()
 
     if contains_strings | contains_nan:
-        return (
+        return pd.DataFrame(), (
             "Some values in the uploaded CSV contains strings and/or "
             "NaN values. Please check the file and re-upload."
         )
 
-    return uploaded_data
+    return uploaded_data, None
 
 
 def get_iris_dictionary() -> dict[int, str]:

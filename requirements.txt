@@ -6,3 +6,4 @@ pytest==8.2.2
 shiny==1.0.0
 fsspec==2024.6.1
 s3fs==0.4.2
+evidently==0.4.39
