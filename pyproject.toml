@@ -1,0 +1,40 @@
+[project]
+name = "sagemaker-intro"
+version = "0.2.1"
+description = "An end-to-end modularised machine learning operations project using Amazon Sagemaker resources."
+readme = "README.md"
+requires-python = ">=3.12.3"
+dependencies = [
+    "click==8.1.7",
+    "evidently==0.4.39",
+    "fsspec==2024.6.1",
+    "pytest==8.2.2",
+    "python-dotenv==1.0.1",
+    "s3fs==0.4.2",
+    "sagemaker==2.226.1",
+    "scikit-learn==1.5.1",
+    "shiny==1.0.0",
+]
+
+[project.scripts]
+e2e = "cli:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+include = [
+    "/apps",
+    "/pipelines",
+    "/scripts",
+    "/steps",
+    "/utils",
+    "*.py",
+]
+exclude = [
+  "/.github",
+  "/tests",
+  "/assets",
+  "/data",
+]

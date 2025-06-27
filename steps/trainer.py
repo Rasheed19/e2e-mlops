@@ -1,7 +1,6 @@
 from sagemaker.inputs import TrainingInput
 from sagemaker.session import Session
 from sagemaker.sklearn import SKLearn
-from sagemaker.sklearn.estimator import SKLearn
 from sagemaker.workflow.steps import TrainingStep
 
 

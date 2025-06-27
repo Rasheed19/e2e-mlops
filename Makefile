@@ -4,8 +4,7 @@ setup: install create-env
 .PHONY: install
 install:
 	@echo "Installing dependencies..."
-	pip install --upgrade pip &&\
-	pip install -r requirements.txt
+	uv sync --locked --all-extras
 
 .PHONY: create-env
 create-env:
