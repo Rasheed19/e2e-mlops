@@ -43,4 +43,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Run deployment pipeline
-        run: uv run e2e train --serverless
+        run: uv run e2e deploy --serverless
