@@ -120,15 +120,6 @@ def deploy_model(
 ) -> None:
     endpoint_name = f"{endpoint_name}-{dt.now().strftime('%Y-%m-%d-%H-%M-%S')}"
 
-    # create data capture config
-    data_capture_config = DataCaptureConfig(
-        enable_capture=False
-        if serverless
-        else True,  # enable data capture only for real-time mode
-        sampling_percentage=100,
-        destination_s3_uri=data_capture_destination_uri,
-    )
-
     if serverless and serverless_inference_config:
         logger.info(
             "Deploying model in serverless mode with the following configuration:\n"
@@ -145,13 +136,19 @@ def deploy_model(
             endpoint_name=endpoint_name,
             serverless_inference_config=serverless_inference_config,
             wait=False,
-            data_capture_config=data_capture_config,
         )
     else:
         logger.info(
             f"Deploying model in real-time mode with intance type '{instance_type}' and "
             f"initial instance count {instance_count}."
         )
+        # create data capture config
+        data_capture_config = DataCaptureConfig(
+            enable_capture=True,  # enable data capture only for real-time mode
+            sampling_percentage=100,
+            destination_s3_uri=data_capture_destination_uri,
+        )
+
         latest_model.model.deploy(
             endpoint_name=endpoint_name,
             initial_instance_count=instance_count,
