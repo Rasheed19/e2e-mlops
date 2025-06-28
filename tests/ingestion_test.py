@@ -13,7 +13,7 @@ def test_column_match(iris):
         "sepal width (cm)",
         "petal length (cm)",
         "petal width (cm)",
-        "iris",
+        "target",
     ]
 
     assert valid_column_names == list(iris.columns), (
