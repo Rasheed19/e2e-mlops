@@ -55,4 +55,4 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Run training pipeline
-        run: e2e train
+        run: uv run e2e train
