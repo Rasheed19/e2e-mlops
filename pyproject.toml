@@ -3,7 +3,7 @@ name = "sagemaker-intro"
 version = "0.2.1"
 description = "An end-to-end modularised machine learning operations project using Amazon Sagemaker resources."
 readme = "README.md"
-requires-python = ">=3.12.3"
+requires-python = ">=3.11"
 dependencies = [
     "click==8.1.7",
     "evidently==0.4.39",
